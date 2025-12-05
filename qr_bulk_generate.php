@@ -31,9 +31,39 @@ if ($role === 'admin') {
 @media print {
     body * { visibility: hidden; }
     .print-area, .print-area * { visibility: visible; }
-    .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+    .print-area { 
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        width: 100%; 
+    }
     .no-print { display: none !important; }
-    .id-card-grid { page-break-inside: avoid; }
+    
+    /* Print-ready layout: 2 cards per page */
+    .id-card-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 20px !important;
+        padding: 20px !important;
+    }
+    
+    .mini-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        margin-bottom: 20px;
+    }
+    
+    /* Force page break after every 2 cards */
+    .mini-card:nth-child(2n) {
+        page-break-after: always;
+        break-after: always;
+    }
+    
+    /* Remove hover effects in print */
+    .mini-card:hover {
+        transform: none !important;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2) !important;
+    }
 }
 
 .bulk-container {
@@ -52,21 +82,31 @@ if ($role === 'admin') {
 .form-group label {
     display: block;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
     margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.form-group label i {
+    margin-right: 5px;
+    color: var(--primary-blue);
 }
 
 .form-control {
     width: 100%;
     padding: 12px;
-    border: 2px solid #E5E7EB;
+    border: 2px solid var(--border-color);
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
+    background: var(--main-bg);
+    color: var(--text-primary);
+    transition: all 0.2s ease;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: #1561AD;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.1);
 }
 
 .action-bar {
@@ -116,19 +156,38 @@ if ($role === 'admin') {
 
 .progress-bar {
     width: 100%;
-    height: 4px;
-    background: #E5E7EB;
-    border-radius: 2px;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
     overflow: hidden;
     margin-top: 15px;
     display: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #10b981, #059669);
+    background: linear-gradient(90deg, var(--success), #059669);
     width: 0%;
-    transition: width 0.3s;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.info-message {
+    background: #EFF6FF;
+    border-left: 4px solid var(--info);
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #1E40AF;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-message i {
+    font-size: 18px;
 }
 
 .id-card-grid {
@@ -223,28 +282,36 @@ if ($role === 'admin') {
 }
 
 .stats-bar {
-    background: #F3F4F6;
-    padding: 15px 25px;
-    border-radius: 8px;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    padding: 20px 25px;
+    border-radius: 12px;
     margin-bottom: 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .stat-item {
     text-align: center;
+    padding: 0 20px;
 }
 
 .stat-value {
-    font-size: 24px;
+    font-size: 32px;
     font-weight: 700;
-    color: #1561AD;
+    color: var(--primary-blue);
+    line-height: 1;
+    margin-bottom: 5px;
 }
 
 .stat-label {
-    font-size: 14px;
-    color: #6B7280;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
 }
 </style>
 
@@ -258,9 +325,14 @@ if ($role === 'admin') {
     </div>
     <div style="padding: 25px;">
         
+        <div class="info-message">
+            <i class="fas fa-info-circle"></i>
+            <span>Use the filters below to select specific students by year level and section. You can print all visible cards or download them as a ZIP file organized by grade and section.</span>
+        </div>
+        
         <div class="filter-section">
             <div class="form-group">
-                <label>Filter by Year Level</label>
+                <label><i class="fas fa-layer-group"></i> Filter by Year Level</label>
                 <select id="filterYear" class="form-control">
                     <option value="">All Year Levels</option>
                     <option value="7">Grade 7</option>
@@ -273,12 +345,14 @@ if ($role === 'admin') {
             </div>
             
             <div class="form-group">
-                <label>Filter by Section</label>
-                <input type="text" id="filterSection" class="form-control" placeholder="e.g., A, B, C">
+                <label><i class="fas fa-users"></i> Filter by Section</label>
+                <select id="filterSection" class="form-control">
+                    <option value="">All Sections</option>
+                </select>
             </div>
             
             <div class="form-group">
-                <label>Search Student</label>
+                <label><i class="fas fa-search"></i> Search Student</label>
                 <input type="text" id="searchStudent" class="form-control" placeholder="Search by name or ID">
             </div>
         </div>
@@ -302,7 +376,7 @@ if ($role === 'admin') {
                 <i class="fas fa-download"></i> Download as ZIP
             </button>
             <button onclick="selectAll()" class="btn btn-secondary">
-                <i class="fas fa-check-square"></i> Select All
+                <i class="fas fa-redo"></i> Clear Filters
             </button>
         </div>
 
@@ -359,6 +433,7 @@ if ($role === 'admin') {
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.mini-card');
     
+    // Generate QR codes for all cards
     cards.forEach(card => {
         const qrContainer = card.querySelector('[data-qr-container]');
         const qrData = card.dataset.qr;
@@ -373,11 +448,37 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Populate section dropdown dynamically
+    populateSectionDropdown();
+    
     updateStats();
 });
 
+// Populate section dropdown with unique sections from students
+function populateSectionDropdown() {
+    const cards = document.querySelectorAll('.mini-card');
+    const sections = new Set();
+    
+    cards.forEach(card => {
+        const section = card.dataset.section;
+        if (section && section.trim() !== '') {
+            sections.add(section);
+        }
+    });
+    
+    const sectionSelect = document.getElementById('filterSection');
+    const sortedSections = Array.from(sections).sort();
+    
+    sortedSections.forEach(section => {
+        const option = document.createElement('option');
+        option.value = section;
+        option.textContent = `Section ${section}`;
+        sectionSelect.appendChild(option);
+    });
+}
+
 document.getElementById('filterYear').addEventListener('change', filterCards);
-document.getElementById('filterSection').addEventListener('input', filterCards);
+document.getElementById('filterSection').addEventListener('change', filterCards);
 document.getElementById('searchStudent').addEventListener('input', filterCards);
 
 function filterCards() {
@@ -394,7 +495,7 @@ function filterCards() {
         const id = card.dataset.id.toLowerCase();
         
         const yearMatch = !yearFilter || year === yearFilter;
-        const sectionMatch = !sectionFilter || section.includes(sectionFilter);
+        const sectionMatch = !sectionFilter || section === sectionFilter;
         const searchMatch = !searchFilter || name.includes(searchFilter) || id.includes(searchFilter);
         
         if (yearMatch && sectionMatch && searchMatch) {
@@ -416,6 +517,13 @@ function updateStats() {
 }
 
 function printAllCards() {
+    const visibleCards = Array.from(document.querySelectorAll('.mini-card')).filter(card => card.style.display !== 'none');
+    
+    if (visibleCards.length === 0) {
+        alert('No cards to print. Please adjust your filters.');
+        return;
+    }
+    
     window.print();
 }
 
@@ -427,35 +535,78 @@ async function downloadAllCards() {
         return;
     }
     
+    // Show confirmation for large batches
+    if (cards.length > 50) {
+        const confirmed = confirm(`You are about to download ${cards.length} QR codes. This may take a few minutes. Continue?`);
+        if (!confirmed) return;
+    }
+    
     const zip = new JSZip();
     const progressBar = document.getElementById('progressBar');
     const progressFill = document.getElementById('progressFill');
     
     progressBar.style.display = 'block';
+    progressFill.style.width = '0%';
+    
+    // Create folders in ZIP based on year level and section
+    const yearFilter = document.getElementById('filterYear').value;
+    const sectionFilter = document.getElementById('filterSection').value;
     
     for (let i = 0; i < cards.length; i++) {
         const card = cards[i];
         const studentId = card.dataset.id;
         const studentName = card.dataset.name;
+        const year = card.dataset.year;
+        const section = card.dataset.section;
         
         try {
             const canvas = await html2canvas(card, {
                 scale: 3,
-                backgroundColor: null
+                backgroundColor: null,
+                logging: false
             });
             
-            const blob = await new Promise(resolve => canvas.toBlob(resolve));
-            zip.file(`QR_${studentId}_${studentName.replace(/\s+/g, '_')}.png`, blob);
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            
+            // Organize files in folders by year and section
+            const folderPath = `Grade_${year}/Section_${section}`;
+            const fileName = `${studentId}_${studentName.replace(/\s+/g, '_')}.png`;
+            
+            zip.file(`${folderPath}/${fileName}`, blob);
             
             const progress = ((i + 1) / cards.length) * 100;
             progressFill.style.width = progress + '%';
+            
+            // Small delay to prevent browser freezing
+            if (i % 10 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
         } catch (error) {
-            console.error('Error generating card:', error);
+            console.error('Error generating card for student:', studentId, error);
         }
     }
     
-    const content = await zip.generateAsync({type: 'blob'});
-    saveAs(content, `QR_Codes_${new Date().toISOString().split('T')[0]}.zip`);
+    // Generate ZIP file name based on filters
+    let zipFileName = 'QR_Codes';
+    if (yearFilter) zipFileName += `_Grade${yearFilter}`;
+    if (sectionFilter) zipFileName += `_Section${sectionFilter}`;
+    zipFileName += `_${new Date().toISOString().split('T')[0]}.zip`;
+    
+    try {
+        const content = await zip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+        });
+        
+        saveAs(content, zipFileName);
+        
+        // Show success message
+        alert(`Successfully generated ${cards.length} QR codes!`);
+    } catch (error) {
+        console.error('Error generating ZIP:', error);
+        alert('Error creating ZIP file. Please try with fewer cards or contact support.');
+    }
     
     progressBar.style.display = 'none';
     progressFill.style.width = '0%';

@@ -2,18 +2,19 @@
 
 ## Introduction
 
-The Smart Classroom Attendance and Grading System is a web-based application designed to automate attendance tracking using QR code scanning technology, manage student grades, and provide real-time SMS notifications to parents. The system serves three user roles: Administrators, Teachers, and Students, each with specific capabilities for managing educational data and monitoring student performance.
+The Smart Classroom Attendance and Grading System is a web-based application designed to automate attendance tracking using barcode scanning technology, manage student grades, and provide real-time SMS notifications to parents. The system serves three user roles: Administrators, Teachers, and Students, each with specific capabilities for managing educational data and monitoring student performance. The system features a mobile-first design approach with a public barcode scanning interface.
 
 ## Glossary
 
 - **System**: The Smart Classroom Attendance and Grading System web application
-- **QR Scanner Module**: The browser-based webcam component that reads student QR codes using html5-qrcode library
-- **Attendance Handler**: The PHP backend component that processes scanned QR codes and records attendance
+- **Barcode Scanner Module**: The browser-based camera component that reads student Code 128 barcodes using QuaggaJS library
+- **Attendance Handler**: The PHP backend component that processes scanned barcodes and records attendance
 - **SMS Gateway**: The external API service (Semaphore or Twilio) that sends notifications to parents
 - **Admin Dashboard**: The administrative interface for managing users, viewing reports, and analyzing data
 - **Grade Entry Module**: The teacher interface for recording and managing student grades
 - **Student Portal**: The student-facing interface for viewing attendance and grades
 - **Authentication Module**: The login system that manages user sessions and role-based access
+- **Public Scan Page**: The publicly accessible barcode scanning interface that does not require authentication
 
 ## Requirements
 
@@ -31,27 +32,29 @@ The Smart Classroom Attendance and Grading System is a web-based application des
 
 ### Requirement 2
 
-**User Story:** As an administrator, I want to manage student records and generate unique QR codes, so that each student has a scannable identifier for attendance tracking.
+**User Story:** As an administrator, I want to manage student records and generate unique barcodes, so that each student has a scannable identifier for attendance tracking.
 
 #### Acceptance Criteria
 
 1. THE System SHALL provide functionality to create, read, update, and delete student records containing student ID, name, section, year level, and contact number
-2. WHEN an administrator creates a new student record, THE System SHALL automatically generate a unique QR code containing the student ID using the phpqrcode library
-3. THE System SHALL store generated QR code images in the qrcodes directory with filenames matching the student ID
+2. WHEN an administrator creates a new student record, THE System SHALL automatically generate a unique Code 128 barcode containing the student ID using the JsBarcode library
+3. THE System SHALL store generated barcode images in the barcodes directory with filenames matching the student ID
 4. THE System SHALL prevent duplicate student IDs by validating uniqueness before saving new records
 5. THE System SHALL provide functionality to export the student list to CSV format
 
 ### Requirement 3
 
-**User Story:** As a teacher, I want to scan student QR codes using my webcam to record attendance, so that I can quickly and accurately track which students are present.
+**User Story:** As a user, I want to scan student barcodes using a public scanning page to record attendance, so that I can quickly and accurately track which students are present without requiring authentication.
 
 #### Acceptance Criteria
 
-1. THE QR Scanner Module SHALL request webcam permission from the browser and display a live camera feed
-2. WHEN the QR Scanner Module detects a valid student QR code, THE System SHALL send the student ID to the Attendance Handler via AJAX
-3. THE Attendance Handler SHALL record the student ID, current date, current time, and status as "Present" in the attendance table
-4. IF a student has already been marked present for the current date, THEN THE System SHALL reject the duplicate entry and display a warning message
-5. WHEN attendance is successfully recorded, THE System SHALL trigger the SMS Gateway to send a notification to the parent contact number
+1. THE Barcode Scanner Module SHALL be accessible via a public URL without requiring user authentication
+2. THE Barcode Scanner Module SHALL request camera permission from the browser and display a live camera feed optimized for mobile devices
+3. WHEN the Barcode Scanner Module detects a valid student Code 128 barcode, THE System SHALL send the student ID to the Attendance Handler via AJAX
+4. THE Attendance Handler SHALL record the student ID, current date, current time, and status as "Present" in the attendance table
+5. IF a student has already been marked present for the current date, THEN THE System SHALL reject the duplicate entry and display a warning message
+6. WHEN attendance is successfully recorded, THE System SHALL trigger the SMS Gateway to send a notification to the parent contact number
+7. THE Barcode Scanner Module SHALL provide separate interfaces for Time In and Time Out scanning
 
 ### Requirement 4
 
@@ -107,8 +110,8 @@ The Smart Classroom Attendance and Grading System is a web-based application des
 
 #### Acceptance Criteria
 
-1. IF the QR Scanner Module cannot access the webcam, THEN THE System SHALL display an alert message instructing the user to grant camera permissions
-2. WHEN the QR Scanner Module detects an invalid or unrecognized QR code, THE System SHALL display an error message without recording attendance
+1. IF the Barcode Scanner Module cannot access the camera, THEN THE System SHALL display an alert message instructing the user to grant camera permissions
+2. WHEN the Barcode Scanner Module detects an invalid or unrecognized barcode, THE System SHALL display an error message without recording attendance
 3. THE System SHALL log all database connection errors to the error_log.txt file in the logs directory
 4. THE System SHALL validate all form inputs and display specific error messages for invalid data
 5. WHEN a database operation fails, THE System SHALL display a user-friendly error message and log the technical details for administrator review

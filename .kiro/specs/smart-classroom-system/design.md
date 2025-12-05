@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Smart Classroom Attendance and Grading System is a three-tier web application built with PHP, MySQL, and JavaScript. The system uses a traditional server-side rendering architecture with AJAX for real-time interactions. The application follows a role-based access control (RBAC) pattern with four distinct user roles: Admin, Teacher, Advisor, and Student. The frontend uses Bootstrap 5 for responsive design and Tailwind CSS for utility styling, with a custom DepEd color scheme (Blue #0038A8, Red #CE1126, Yellow #FCD116). The system integrates third-party libraries including html5-qrcode for webcam-based QR scanning, phpqrcode for QR code generation, and SMS gateway APIs for parent notifications.
+The Smart Classroom Attendance and Grading System is a three-tier web application built with PHP, MySQL, and JavaScript. The system uses a traditional server-side rendering architecture with AJAX for real-time interactions. The application follows a role-based access control (RBAC) pattern with four distinct user roles: Admin, Teacher, Advisor, and Student. The frontend uses **Tailwind CSS exclusively** with a mobile-first design approach and a custom DepEd color scheme (Blue #0038A8, Red #CE1126, Yellow #FCD116). The system features a **public barcode scanning interface** that does not require authentication, integrating QuaggaJS for Code 128 barcode scanning, JsBarcode for barcode generation, and SMS gateway APIs for parent notifications.
 
 
 ## Architecture
@@ -13,9 +13,9 @@ The application follows a **Layered Monolithic Architecture** with clear separat
 
 1. **Presentation Layer** (Frontend)
    - HTML/PHP views with embedded PHP logic
-   - Bootstrap 5 + Tailwind CSS for styling
+   - Tailwind CSS for styling (mobile-first approach)
    - JavaScript for client-side interactions
-   - html5-qrcode library for QR scanning
+   - QuaggaJS library for Code 128 barcode scanning
 
 2. **Application Layer** (Backend)
    - PHP scripts handling business logic
@@ -61,14 +61,14 @@ smart-classroom/
 │   ├── footer.php
 │   ├── permissions.php
 │   └── activity_logger.php
-├── qrcodes/                # Generated QR code images
+├── barcodes/               # Generated barcode images
 ├── logs/                   # Application logs
 ├── config.php              # Database configuration
 ├── db_connect.php          # Database connection
 ├── login.php               # Authentication entry point
 ├── dashboard.php           # Role-based dashboard router
-├── qr_generate.php         # QR code generation
-├── qr_scan.html            # QR scanner interface
+├── scan.php                # Public barcode scanner (Time In/Out)
+├── barcode_generate.php    # Barcode generation
 ├── attendance_handler.php  # Attendance processing
 └── send_sms.php            # SMS notification handler
 ```
@@ -78,13 +78,14 @@ smart-classroom/
 - **Backend**: PHP 7.4+
 - **Database**: MySQL 5.7+ / MariaDB 10.3+
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **CSS Frameworks**: Bootstrap 5.3, Tailwind CSS 3.x
+- **CSS Framework**: Tailwind CSS 3.x (mobile-first)
 - **JavaScript Libraries**: 
-  - html5-qrcode (QR scanning)
+  - QuaggaJS (Code 128 barcode scanning)
+  - JsBarcode (barcode generation)
   - Chart.js (data visualization)
 - **PHP Libraries**:
-  - phpqrcode (QR generation)
-  - PDO (database access)
+  - PDO/MySQLi (database access)
+  - FPDF (PDF generation)
 - **SMS Gateway**: Semaphore API / Twilio API
 
 ## Components and Interfaces
@@ -117,56 +118,66 @@ hasPermission($permission): bool
 - SQL injection prevention via prepared statements
 - XSS protection via `htmlspecialchars()`
 
-### 2. QR Code Generation Module
+### 2. Barcode Generation Module
 
-**Purpose**: Creates unique QR codes for each student containing their student ID.
+**Purpose**: Creates unique Code 128 barcodes for each student containing their student ID.
 
 **Components**:
-- `qr_generate.php` - QR code generation endpoint
-- `phpqrcode` library
+- `barcode_generate.php` - Barcode generation endpoint
+- `JsBarcode` library (client-side generation)
 
 **Key Functions**:
 ```php
-generateStudentQR($student_id): string
-saveQRImage($student_id, $image_data): bool
+generateStudentBarcode($student_id): string
+saveBarcodeImage($student_id, $image_data): bool
 ```
 
-**QR Code Format**:
+**Barcode Format**:
+- Type: Code 128
 - Content: Student ID (e.g., "2024-001")
-- Size: 300x300 pixels
-- Error correction: Level H (high)
-- Storage: `/qrcodes/{student_id}.png`
+- Width: 2 (bar width multiplier)
+- Height: 100 pixels
+- Display value: true (show student ID below barcode)
+- Storage: `/barcodes/{student_id}.png`
 
-### 3. QR Scanner Module
+### 3. Barcode Scanner Module
 
-**Purpose**: Browser-based webcam QR code scanning for attendance tracking.
+**Purpose**: Public browser-based camera barcode scanning for attendance tracking (no authentication required).
 
 **Components**:
-- `qr_scan.html` - Scanner interface
-- `html5-qrcode` library
+- `scan.php` - Public scanner interface (Time In/Out)
+- `QuaggaJS` library for Code 128 scanning
 - `attendance_handler.php` - Backend processor
 
 **Key Functions**:
 ```javascript
 // Frontend
-initializeScanner(): void
-onScanSuccess(decodedText): void
-sendAttendanceData(student_id): Promise
+initializeBarcodeScanner(): void
+onBarcodeDetected(code): void
+sendAttendanceData(student_id, scan_type): Promise
 
 // Backend (attendance_handler.php)
-recordAttendance($student_id): array
+recordAttendance($student_id, $scan_type): array
 checkDuplicateAttendance($student_id, $date): bool
 ```
 
 **Workflow**:
-1. User opens `qr_scan.html`
-2. Browser requests webcam permission
-3. html5-qrcode library scans for QR codes
-4. On successful scan, extract student ID
-5. AJAX POST to `attendance_handler.php`
-6. Backend validates and records attendance
-7. Trigger SMS notification
-8. Return success/error response
+1. User opens public `scan.php` page (no login required)
+2. User selects Time In or Time Out mode
+3. Browser requests camera permission
+4. QuaggaJS library scans for Code 128 barcodes
+5. On successful scan, extract student ID
+6. AJAX POST to `attendance_handler.php` with scan type
+7. Backend validates and records attendance
+8. Trigger SMS notification
+9. Return success/error response with student info
+10. Display confirmation on mobile-optimized interface
+
+**Mobile-First Design**:
+- Large touch-friendly buttons
+- Optimized camera viewport for mobile devices
+- Responsive layout using Tailwind CSS
+- Fast barcode detection optimized for handheld devices
 
 ### 4. Attendance Management Module
 
@@ -187,11 +198,13 @@ calculateAttendanceRate($student_id, $period): float
 ```
 
 **Business Rules**:
-- One attendance record per student per day
-- Duplicate scans on same day are rejected
-- Default status: "Present"
+- Separate Time In and Time Out records per student per day
+- Duplicate Time In scans on same day are rejected
+- Time Out can only be recorded if Time In exists
+- Default status: "On Time" (if before 8:00 AM) or "Late" (if after 8:00 AM)
 - Attendance time recorded to the second
-- SMS notification triggered on successful recording
+- SMS notification triggered on successful Time In recording
+- Public scan page accessible without authentication
 
 ### 5. Grade Management Module
 
@@ -399,7 +412,7 @@ CREATE TABLE students (
     contact_number VARCHAR(15) NOT NULL,
     parent_contact VARCHAR(15) NOT NULL,
     email VARCHAR(100),
-    qr_code_path VARCHAR(255),
+    barcode_path VARCHAR(255),
     user_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
@@ -565,14 +578,14 @@ function handleAjaxError(xhr, status, error) {
     showAlert(message, 'error');
 }
 
-// QR Scanner error handling
+// Barcode Scanner error handling
 function onScanError(error) {
     if (error.includes('NotAllowedError')) {
         showAlert('Camera permission denied. Please allow camera access.', 'error');
     } else if (error.includes('NotFoundError')) {
         showAlert('No camera found on this device.', 'error');
     } else {
-        console.error('QR Scan Error:', error);
+        console.error('Barcode Scan Error:', error);
     }
 }
 ```
@@ -852,23 +865,28 @@ Student: student1 / student123
 - Works without JavaScript enabled
 - Simpler development for PHP developers
 
-### 4. Bootstrap + Tailwind CSS
-**Decision**: Use both Bootstrap and Tailwind CSS.
+### 4. Tailwind CSS Only (Mobile-First)
+**Decision**: Use Tailwind CSS exclusively with mobile-first approach.
 
 **Rationale**:
-- Bootstrap for component library (modals, dropdowns)
-- Tailwind for custom utility styling
-- Faster development with pre-built components
-- Flexibility for custom designs
+- Utility-first approach for rapid development
+- Complete design control without framework constraints
+- Smaller bundle size (no unused CSS)
+- Mobile-first responsive design built-in
+- Better performance and customization
+- Modern development workflow with JIT compiler
 
-### 5. Browser-Based QR Scanning
-**Decision**: Use html5-qrcode library instead of native mobile app.
+### 5. Browser-Based Barcode Scanning with Public Access
+**Decision**: Use QuaggaJS library for Code 128 scanning with public access (no authentication).
 
 **Rationale**:
 - No app installation required
 - Works on any device with camera and browser
+- Public access allows quick scanning without login delays
+- Code 128 provides better reliability than QR codes for handheld scanning
 - Easier updates (just update web code)
 - Lower development cost
+- Mobile-optimized for school staff using smartphones/tablets
 
 ### 6. SMS Gateway Integration
 **Decision**: Integrate with third-party SMS API instead of building own.
@@ -888,14 +906,15 @@ Student: student1 / student123
 - Sufficient features for relational data
 - Good performance for expected data volume
 
-### 8. File-Based QR Code Storage
-**Decision**: Store QR codes as image files instead of generating on-the-fly.
+### 8. File-Based Barcode Storage
+**Decision**: Store Code 128 barcodes as image files instead of generating on-the-fly.
 
 **Rationale**:
 - Faster retrieval (no generation overhead)
-- Can be printed or downloaded easily
+- Can be printed on ID cards or downloaded easily
 - Reduces server CPU usage
 - Simpler implementation
+- Code 128 format ideal for printing on student ID cards
 
 ### 9. DepEd Color Scheme
 **Decision**: Use official DepEd colors (Blue, Red, Yellow).

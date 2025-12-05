@@ -219,6 +219,9 @@ if ($_SESSION['role'] === 'advisor') {
             <button type="button" onclick="window.print()" class="btn btn-secondary">
                 <i class="fas fa-print"></i> Print Report
             </button>
+            <a href="../export_attendance_pdf.php?date_from=<?php echo $date_from; ?>&date_to=<?php echo $date_to; ?>&section=<?php echo urlencode($section); ?>&status=<?php echo urlencode($status_filter); ?>" class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Export to PDF
+            </a>
             <a href="analytics.php?export=excel&type=attendance" class="btn btn-success">
                 <i class="fas fa-file-excel"></i> Export to Excel
             </a>

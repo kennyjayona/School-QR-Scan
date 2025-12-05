@@ -49,57 +49,65 @@ if ($role === 'admin') {
     .no-print { display: none !important; }
 }
 
-.qr-generator-container {
-    padding: 0;
-}
-
 .form-row {
     display: flex;
     gap: 15px;
     align-items: end;
+    margin-bottom: 0;
 }
 
 .form-group {
     flex: 1;
 }
 
-.form-label {
+.form-group label {
     display: block;
     font-weight: 600;
-    color: #374151;
+    color: var(--text-primary);
     margin-bottom: 8px;
+    font-size: 13px;
 }
 
-.form-control {
+.form-group select.form-control {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #E5E7EB;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    font-size: 16px;
+    background: var(--main-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s ease;
 }
 
-.form-control:focus {
+.form-group select.form-control:focus {
     outline: none;
-    border-color: #1561AD;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 56, 168, 0.1);
 }
 
 .btn-generate {
-    padding: 12px 30px;
-    background: #1561AD;
+    padding: 10px 24px;
+    background: var(--primary-blue);
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s;
+    transition: all 0.2s ease;
 }
 
 .btn-generate:hover {
-    background: #0d4a8a;
+    background: #002d8a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 56, 168, 0.3);
+}
+
+.card-body {
+    padding: 25px;
 }
 
 .id-card-container {
@@ -270,45 +278,49 @@ if ($role === 'admin') {
 }
 
 .btn-custom {
-    padding: 12px 30px;
+    padding: 10px 24px;
     border-radius: 8px;
     font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    font-size: 14px;
 }
 
 .btn-download {
-    background: linear-gradient(135deg, #10b981, #059669);
+    background: var(--success);
     color: white;
 }
 
 .btn-download:hover {
+    background: #059669;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-print {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    background: var(--info);
     color: white;
 }
 
 .btn-print:hover {
+    background: #2563eb;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btn-export-all {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
+    background: var(--warning);
     color: white;
 }
 
 .btn-export-all:hover {
+    background: #d97706;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 </style>
 
@@ -320,11 +332,11 @@ if ($role === 'admin') {
             Generate Student QR Code
         </div>
     </div>
-    <div style="padding: 25px;">
+    <div class="card-body">
         <form method="GET">
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Select Student</label>
+                    <label>Select Student</label>
                     <select name="student_id" class="form-control" required>
                         <option value="">-- Choose a student --</option>
                         <?php while ($student = $students->fetch_assoc()): ?>

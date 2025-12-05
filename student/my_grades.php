@@ -56,6 +56,9 @@ include '../includes/student_header.php';
             Grade Summary
         </div>
         <div class="card-actions">
+            <a href="../export_student_grades_pdf.php" class="btn btn-danger me-2">
+                <i class="fas fa-file-pdf"></i> Export to PDF
+            </a>
             <span class="badge" style="background: var(--info); color: white; padding: 8px 16px; font-size: 14px;">
                 <?php echo $total_grades; ?> Grades
             </span>

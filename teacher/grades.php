@@ -63,6 +63,9 @@ include '../includes/teacher_header.php';
             Recent Grades
         </div>
         <div class="card-actions">
+            <a href="../export_grades_pdf.php" class="btn btn-danger me-2">
+                <i class="fas fa-file-pdf"></i> Export to PDF
+            </a>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGradeModal">
                 <i class="fas fa-plus"></i> Add Grade
             </button>

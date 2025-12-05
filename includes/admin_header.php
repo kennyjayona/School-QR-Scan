@@ -18,7 +18,7 @@ $current_page = $current_page ?? 'dashboard';
     <title><?php echo $page_title; ?> - Smart Classroom</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="../assets/css/modern-dashboard.css" rel="stylesheet">
+    <link href="assets/css/modern-dashboard.css" rel="stylesheet">
 </head>
 
 <body>
@@ -85,16 +85,28 @@ $current_page = $current_page ?? 'dashboard';
                 </a>
                 <a href="reports.php" class="menu-item <?php echo $current_page == 'reports' ? 'active' : ''; ?>">
                     <i class="fas fa-file-alt"></i>
-                    <span>Reports</span>
+                    <span>Attendance Reports</span>
+                </a>
+                <a href="grades_report.php" class="menu-item <?php echo $current_page == 'grades_report' ? 'active' : ''; ?>">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Grade Reports</span>
+                </a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-section-title">QR Codes</div>
+                <a href="../qr_generate.php" class="menu-item <?php echo $current_page == 'qr_generate' ? 'active' : ''; ?>">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Generate QR</span>
+                </a>
+                <a href="../qr_bulk_generate.php" class="menu-item <?php echo $current_page == 'qr_bulk' ? 'active' : ''; ?>">
+                    <i class="fas fa-th"></i>
+                    <span>Bulk QR Generation</span>
                 </a>
             </div>
 
             <div class="menu-section">
                 <div class="menu-section-title">Settings</div>
-                <a href="../qr_generate.php" class="menu-item <?php echo $current_page == 'qr_generate' ? 'active' : ''; ?>">
-                    <i class="fas fa-qrcode"></i>
-                    <span>Generate QR</span>
-                </a>
                 <a href="user_management.php" class="menu-item <?php echo $current_page == 'users' ? 'active' : ''; ?>">
                     <i class="fas fa-user-shield"></i>
                     <span>User Management</span>
